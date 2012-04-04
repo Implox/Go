@@ -16,6 +16,8 @@ type VisitState =
 type ActiveBoard (sideLength : int) =
     let CellGrid = Array2D.create sideLength sideLength CellState.Empty
 
+    /// Array of cells visited by the GetLiberties function
+    /// Must be reset each time GetLiberties has been evaluated
     let VisitGrid = Array2D.create sideLength sideLength VisitState.NotVisited
 
     /// List of all the adjacent cells to a given stone.
@@ -38,7 +40,8 @@ type ActiveBoard (sideLength : int) =
             let currentNeighbors = neighborList |> List.filter (fun n -> GetCellState n <> CellState.Empty && GetVisitState n <> VisitState.Visited)
             match currentNeighbors with
             | [] -> currentLiberties
-            | _ -> currentLiberties @ GetLiberties (currentNeighbors.Head)
+            | [_] -> currentLiberties @ GetLiberties currentNeighbors.[0]
+            | _ -> currentLiberties @ List.collect GetLiberties currentNeighbors
         else []
 
     /// Method called when a player places one of their stones in a given cell of the board.
